@@ -4,9 +4,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const productTitle = document.getElementById("product-title");
     const productDescription = document.getElementById("product-description");
     const productPrice = document.getElementById("product-price");
-    const addToCartButton = document.querySelector(".btn-custom"); 
+    const addToCartButton = document.querySelector(".btn-custom");
     const cartItemsContainer = document.getElementById("cart-items");
     const cartTotal = document.getElementById("cart-total");
+    const quantityInput = document.getElementById("quantity");
+    const increaseBtn = document.getElementById("increase");
+    const decreaseBtn = document.getElementById("decrease");
 
     if (productList) {
         fetch("https://fakestoreapi.com/products")
@@ -31,7 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => console.error("Error fetching products:", error));
     }
 
-
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get("id");
 
@@ -46,20 +48,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 productPrice.textContent = `Rs. ${product.price}`;
 
                 addToCartButton.addEventListener("click", function () {
-                    addToCart(product);
+                    const quantity = parseInt(quantityInput.value);
+                    addToCart(product, quantity);
                 });
             })
             .catch(error => console.error("Error fetching product details:", error));
     }
 
-    function addToCart(product) {
+    function addToCart(product, quantity) {
         let cart = JSON.parse(localStorage.getItem("cart")) || [];
         let existingItem = cart.find(item => item.id === product.id);
 
         if (existingItem) {
-            existingItem.quantity += 1;
+            existingItem.quantity += quantity;
         } else {
-            cart.push({ ...product, quantity: 1 });
+            cart.push({ ...product, quantity });
         }
 
         localStorage.setItem("cart", JSON.stringify(cart));
@@ -74,7 +77,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             cart.forEach(item => {
                 total += item.price * item.quantity;
-
                 const cartItem = document.createElement("div");
                 cartItem.classList.add("row", "mb-3", "align-items-center");
 
@@ -134,4 +136,17 @@ document.addEventListener("DOMContentLoaded", function () {
     if (cartItemsContainer) {
         displayCart();
     }
+
+    // Increase / Decrease Quantity Buttons
+    increaseBtn.addEventListener("click", function () {
+        let value = parseInt(quantityInput.value);
+        quantityInput.value = value + 1;
+    });
+
+    decreaseBtn.addEventListener("click", function () {
+        let value = parseInt(quantityInput.value);
+        if (value > 1) {
+            quantityInput.value = value - 1;
+        }
+    });
 });
